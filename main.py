@@ -13,9 +13,16 @@ if __name__ == "__main__":
         t = int(sys.argv[1])
         n = int(sys.argv[2])
         beginning = np.array([0, 0, 0])
+        print(beginning)
+        previous = beginning
         for i in range(n):
-            print(i)
+            current = np.random.randint(-30, high=30, size=3)
+            dist = np.linalg.norm(previous - current)
+            vel = dist / t
+            print(vel)
+            print(current)
             time.sleep(t)
+            previous = current
 
 
 
