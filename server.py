@@ -15,21 +15,28 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     conn, addr = s.accept()
     with conn:
         print('Connected by', addr)
-        previous = conn.recv(1024)
-        previous = np.fromstring(previous.decode(), dtype = np.int)
-        t_start = time.time()
+        try:
+            previous = conn.recv(1024)
+            previous = np.frombuffer(previous, dtype = np.int)
+            t_start = time.time()
 
-        while True:
-            data = conn.recv(1024)
-            t_end = time.time()
-            data = data.decode()
-            if data == "end":
-                print("Last position has been sent. Ending server's work")
-                s.close()
-                sys.exit(0)
-            current = np.fromstring(data, dtype = np.int)
-            dist = np.linalg.norm(previous - current)
-            vel = dist / (t_end - t_start)
-            conn.sendall(struct.pack('f', vel))
-            previous = current
-            t_start = t_end
+            while True:
+                data = conn.recv(1024)
+                t_end = time.time()
+                if data == "end".encode():
+                    print("Last position has been sent. Ending server's work.")
+                    break
+                current = np.frombuffer(data, dtype = np.int)
+                dist = np.linalg.norm(previous - current)
+                vel = dist / (t_end - t_start)
+                conn.sendall(struct.pack('f', vel))
+                previous = current
+                t_start = t_end
+        
+        except:
+            print("Something has gone wrong. Check the connections.")
+            s.close()
+            sys.exit(1)
+        
+        s.close()
+        sys.exit(0)

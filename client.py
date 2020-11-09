@@ -19,17 +19,24 @@ if __name__ == "__main__":
         t = int(sys.argv[1])
         n = int(sys.argv[2])
         
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((HOST, PORT))
-            s.sendall(START.tobytes())
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((HOST, PORT))
+                s.sendall(START.tobytes())
 
-            for i in range(n):
-                time.sleep(t)
-                current = np.random.randint(1, high=30, size=3)
-                current = current.tobytes()
-                s.sendall(current)
-                data = s.recv(1024)
-                vel = struct.unpack('f', data)[0]
-                print('Current velocity: ', round(vel, 3))
+                for i in range(n):
+                    time.sleep(t)
+                    current = np.random.randint(0, high=30, size=3)
+                    current = current.tobytes()
+                    s.sendall(current)
+                    data = s.recv(1024)
+                    vel = struct.unpack('f', data)[0]
+                    print('Current velocity: ', round(vel, 3))
         
-            s.sendall(b'end')
+                s.sendall(b'end')
+        except:
+            print("Something has gone wrong. Check the connections.")
+            s.close()
+            sys.exit(1)
+        
+        sys.exit(0)
